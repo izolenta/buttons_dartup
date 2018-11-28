@@ -1,0 +1,37 @@
+name: buttons
+description: A new Flutter application.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  screen: ^0.0.3
+  flutter_simple_dependency_injection: ^0.0.5
+  cupertino_icons: ^0.1.2
+  audioplayers: ^0.7.8
+  path_provider: ^0.4.1
+  sqflite: ^0.12.2+1
+  path: any
+  shared_preferences: ^0.4.3
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  assets:
+    - assets/images/
+    - assets/sounds/
+    - assets/db/
+
+  uses-material-design: true
+
+  fonts:
+    - family: LuckiestGuy
+      fonts:
+        - asset: fonts/LuckiestGuy.ttf
