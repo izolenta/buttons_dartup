@@ -15,6 +15,7 @@ dependencies:
   sqflite: ^0.12.2+1
   path: any
   shared_preferences: ^0.4.3
+  spritewidget:
   flutter:
     sdk: flutter
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:buttons/services/context_service.dart';
 import 'package:buttons/services/game_service.dart';
@@ -7,7 +8,10 @@ import 'package:buttons/util/inject_helper.dart';
 import 'package:buttons/util/subscriber.dart';
 import 'package:buttons/widgets/animated/text/appearing_text_line.dart';
 import 'package:buttons/widgets/animated_widget_proxy.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:spritewidget/spritewidget.dart';
+import 'dart:ui' as ui;
 
 class CommonEndgameScreen extends StatefulWidget {
 
@@ -126,6 +130,11 @@ class _CommonEndgameScreenState extends State<CommonEndgameScreen> with SingleTi
   Animation<double> animation;
   ContextService _contextService;
   GameService _gameService;
+  NodeWithSize rootNode;
+  ParticleSystem particles;
+  ImageMap _images;
+
+  final rand = Random();
 
   initState() {
     super.initState();
@@ -141,21 +150,91 @@ class _CommonEndgameScreenState extends State<CommonEndgameScreen> with SingleTi
     final Animation curve = CurvedAnimation(parent: controller, curve: Curves.linear);
     animation = Tween(begin: 0.0, end: 1.0).animate(curve);
     Future.delayed(Duration(milliseconds: 100)).then((_) => controller.forward());
+
+    rootNode = NodeWithSize(Size(400, 600));
+
+    _images = ImageMap(rootBundle);
+    _images.load([
+      'assets/images/particle-2.png',
+    ]).then((_) {
+      Timer(Duration(milliseconds: 800), _setUpInitialTimer);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedCommonEndgameScreen(
-      animation: animation,
-      contextService: _contextService,
-      gameService: _gameService
-    );
+    return Stack(children: [
+        AnimatedCommonEndgameScreen(
+          animation: animation,
+          contextService: _contextService,
+          gameService: _gameService
+        ),
+        IgnorePointer(child: SpriteWidget(rootNode)),
+    ],);
   }
 
   dispose() {
     cancelSubscriptions();
     controller.dispose();
     super.dispose();
+  }
+
+  void _setUpInitialTimer() {
+    if (particles != null) {
+      rootNode.removeChild(particles);
+    }
+    if (_gameService.isWon) {
+      particles = new ParticleSystem(
+        SpriteTexture(_images['assets/images/particle-2.png']),
+        life: 0.8,
+        lifeVar: 0.2,
+        posVar: ui.Offset(0, 0),
+        startSize: 0.6,
+        startSizeVar: 0.0,
+        endSize: 0.0,
+        startRotationVar: 90.0,
+        direction: 0.0,
+        directionVar: 360,
+        speed: 400,
+        speedVar: 50,
+        maxParticles: 200,
+        emissionRate: 1700,
+        colorSequence: ColorSequence([Color(0x30ffffff)], [0.0]),
+        alphaVar: 30,
+        redVar: 175,
+        greenVar: 175,
+        blueVar: 175,
+        numParticlesToEmit: 200,
+        gravity: ui.Offset(0.0, 250.0),
+      );
+      particles.position = ui.Offset(
+          rand.nextDouble() * 300 + 50,
+          rand.nextDouble() * 200 + 50);
+      Timer(Duration(milliseconds: ((rand.nextInt(700)+800))), _setUpInitialTimer);
+
+    }
+    else {
+      particles = new ParticleSystem(
+        SpriteTexture(_images['assets/images/particle-2.png']),
+        life: 5,
+        lifeVar: 0,
+        posVar: ui.Offset(400, 0),
+        startSize: 0.4,
+        endSize: 0.2,
+        startRotationVar: 90.0,
+        direction: 90.0,
+        directionVar: 0,
+        speed: 300,
+        speedVar: 100,
+        maxParticles: 700,
+        emissionRate: 700,
+        colorSequence: ColorSequence([Color(0x20ffffff)], [0.0]),
+        numParticlesToEmit: 700,
+        gravity: ui.Offset(0.0, 900.0),
+      );
+      particles.position = Offset(0, -10);
+    }
+    rootNode.addChild(particles);
   }
 }
 
